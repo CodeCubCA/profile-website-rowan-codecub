@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One Left - Space Adventure Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: radial-gradient(ellipse at center, #0f0f23 0%, #000000 100%);
+            color: white;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(180deg, #000011 0%, #001122 50%, #000000 100%);
+        }
+
+        #gameCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: transparent;
+            cursor: crosshair;
+        }
+
+        #ui {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        #hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            pointer-events: none;
+        }
+
+        .hud-item {
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #ff6b6b;
+            border-radius: 10px;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            text-shadow: 0 0 10px #ff6b6b;
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.3);
+        }
+
+        #instructions {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #4ecdc4;
+            border-radius: 10px;
+            padding: 15px;
+            max-width: 300px;
+            font-size: 12px;
+            text-shadow: 0 0 5px #4ecdc4;
+        }
+
+        #gameOver {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            border: 3px solid #ff6b6b;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            display: none;
+            pointer-events: all;
+            box-shadow: 0 0 50px rgba(255, 107, 107, 0.5);
+        }
+
+        #victory {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            border: 3px solid #4ecdc4;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            display: none;
+            pointer-events: all;
+            box-shadow: 0 0 50px rgba(78, 205, 196, 0.5);
+        }
+
+        button {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            padding: 12px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.6);
+        }
+
+        .back-button {
+            background: linear-gradient(135deg, #4ecdc4, #45b7d1) !important;
+            box-shadow: 0 5px 15px rgba(78, 205, 196, 0.4) !important;
+        }
+
+        .back-button:hover {
+            box-shadow: 0 8px 25px rgba(78, 205, 196, 0.6) !important;
+        }
+
+        #startScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3a 25%, #2d1b69 50%, #ee5a24 75%, #ff6b6b 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            z-index: 20;
+        }
+
+        #startScreen h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 20px #ff6b6b;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        #startScreen p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            line-height: 1.6;
+            color: #b8c6db;
+        }
+
+        @keyframes pulse {
+            0%, 100% { text-shadow: 0 0 20px #ff6b6b; }
+            50% { text-shadow: 0 0 40px #ff6b6b, 0 0 60px #ff6b6b; }
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.8;
+            animation: twinkle 3s ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(1.2); }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div class="stars" id="stars"></div>
+
+        <div id="startScreen">
+            <h1>ONE LEFT</h1>
+            <p>You are the last survivor on a damaged space station. Navigate through asteroid fields, collect fuel, and repair critical systems to escape. But beware - oxygen is running low and time is running out!</p>
+            <button onclick="startGame()">Launch Mission</button>
+            <button class="back-button" onclick="goBack()">Return to Portfolio</button>
+        </div>
+
+        <canvas id="gameCanvas"></canvas>
+
+        <div id="ui">
+            <div id="hud">
+                <div class="hud-item">Hull: <span id="health">100</span>%</div>
+                <div class="hud-item">Oxygen: <span id="oxygen">100</span>%</div>
+                <div class="hud-item">Systems: <span id="systems">0</span>/3</div>
+                <div class="hud-item">Score: <span id="score">0</span></div>
+            </div>
+
+            <div id="instructions">
+                <h3>Controls:</h3>
+                <p>WASD - Move ship<br>
+                Mouse - Aim and shoot<br>
+                Click - Fire lasers<br>
+                Collect energy pods and repair systems!<br>
+                Avoid asteroids!</p>
+            </div>
+        </div>
+
+        <div id="gameOver">
+            <h2>Mission Failed</h2>
+            <p id="gameOverMessage">The space station has been destroyed...</p>
+            <button onclick="restartGame()">Try Again</button>
+            <button class="back-button" onclick="goBack()">Return to Portfolio</button>
+        </div>
+
+        <div id="victory">
+            <h2>Mission Accomplished!</h2>
+            <p id="victoryMessage">You've successfully escaped the damaged station!</p>
+            <p>Final Score: <span id="finalScore">0</span></p>
+            <button onclick="restartGame()">Play Again</button>
+            <button class="back-button" onclick="goBack()">Return to Portfolio</button>
+        </div>
+    </div>
+
+    <script>
+        // Game variables
+        let canvas, ctx;
+        let gameState = 'start'; // start, playing, gameOver, victory
+        let player, asteroids, particles, fuelPods, systems, aliens;
+        let keys = {};
+        let mouse = { x: 0, y: 0 };
+        let gameStats = {
+            health: 100,
+            oxygen: 100,
+            systems: 0,
+            score: 0
+        };
+        let gameTime = 0;
+        let lastTime = 0;
+
+        // Initialize game
+        function init() {
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d');
+
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            // Create stars background
+            createStars();
+
+            // Setup event listeners
+            setupEventListeners();
+
+            // Start game loop
+            gameLoop();
+        }
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.width = Math.random() * 3 + 1 + 'px';
+                star.style.height = star.style.width;
+                star.style.animationDelay = Math.random() * 3 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        function setupEventListeners() {
+            // Keyboard events
+            window.addEventListener('keydown', (e) => {
+                keys[e.key.toLowerCase()] = true;
+            });
+
+            window.addEventListener('keyup', (e) => {
+                keys[e.key.toLowerCase()] = false;
+            });
+
+            // Mouse events
+            canvas.addEventListener('mousemove', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                mouse.x = e.clientX - rect.left;
+                mouse.y = e.clientY - rect.top;
+            });
+
+            canvas.addEventListener('click', (e) => {
+                if (gameState === 'playing') {
+                    fireLaser();
+                }
+            });
+        }
+
+        function startGame() {
+            document.getElementById('startScreen').style.display = 'none';
+            gameState = 'playing';
+
+            // Initialize game objects
+            player = {
+                x: canvas.width / 2,
+                y: canvas.height / 2,
+                angle: 0,
+                size: 15,
+                thrust: 0,
+                vx: 0,
+                vy: 0
+            };
+
+            asteroids = [];
+            particles = [];
+            fuelPods = [];
+            systems = [];
+            aliens = [];
+
+            gameStats = {
+                health: 100,
+                oxygen: 100,
+                systems: 0,
+                score: 0
+            };
+
+            gameTime = 0;
+
+            // Spawn initial objects
+            spawnAsteroids();
+            spawnFuelPods();
+            spawnSystems();
+            spawnAliens();
+
+            updateHUD();
+        }
+
+        function spawnAsteroids() {
+            for (let i = 0; i < 6; i++) {
+                asteroids.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: (Math.random() - 0.5) * 1,
+                    vy: (Math.random() - 0.5) * 1,
+                    size: Math.random() * 25 + 15,
+                    rotation: 0,
+                    rotSpeed: (Math.random() - 0.5) * 0.05
+                });
+            }
+        }
+
+        function spawnFuelPods() {
+            for (let i = 0; i < 5; i++) {
+                fuelPods.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: 8,
+                    collected: false,
+                    pulse: 0
+                });
+            }
+        }
+
+        function spawnSystems() {
+            for (let i = 0; i < 3; i++) {
+                systems.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: 20,
+                    repaired: false,
+                    pulse: 0
+                });
+            }
+        }
+
+        function spawnAliens() {
+            for (let i = 0; i < 3; i++) {
+                aliens.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: (Math.random() - 0.5) * 1,
+                    vy: (Math.random() - 0.5) * 1,
+                    size: 12,
+                    health: 2,
+                    angle: Math.random() * Math.PI * 2,
+                    attackCooldown: 0,
+                    type: Math.random() > 0.5 ? 'scout' : 'fighter',
+                    pulse: 0,
+                    targetAngle: 0
+                });
+            }
+        }
+
+        function gameLoop(currentTime) {
+            const deltaTime = currentTime - lastTime;
+            lastTime = currentTime;
+
+            if (gameState === 'playing') {
+                update(deltaTime);
+            }
+
+            render();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function update(deltaTime) {
+            gameTime += deltaTime;
+
+            // Update player
+            updatePlayer();
+
+            // Update asteroids
+            updateAsteroids();
+
+            // Update particles
+            updateParticles();
+
+            // Update fuel pods
+            updateFuelPods();
+
+            // Update systems
+            updateSystems();
+
+            // Update aliens
+            updateAliens();
+
+            // Decrease oxygen over time - slower depletion
+            gameStats.oxygen -= 0.008;
+
+            // Check win/lose conditions
+            checkGameState();
+
+            updateHUD();
+        }
+
+        function updatePlayer() {
+            // Player movement - no fuel consumption
+            const speed = 0.15;
+            if (keys['w'] || keys['arrowup']) {
+                player.vy -= speed;
+            }
+            if (keys['s'] || keys['arrowdown']) {
+                player.vy += speed;
+            }
+            if (keys['a'] || keys['arrowleft']) {
+                player.vx -= speed;
+            }
+            if (keys['d'] || keys['arrowright']) {
+                player.vx += speed;
+            }
+
+            // Apply drag - more friction
+            player.vx *= 0.95;
+            player.vy *= 0.95;
+
+            // Update position
+            player.x += player.vx;
+            player.y += player.vy;
+
+            // Wrap around screen
+            if (player.x < 0) player.x = canvas.width;
+            if (player.x > canvas.width) player.x = 0;
+            if (player.y < 0) player.y = canvas.height;
+            if (player.y > canvas.height) player.y = 0;
+
+            // Calculate angle to mouse
+            player.angle = Math.atan2(mouse.y - player.y, mouse.x - player.x);
+        }
+
+        function updateAsteroids() {
+            asteroids.forEach(asteroid => {
+                asteroid.x += asteroid.vx;
+                asteroid.y += asteroid.vy;
+                asteroid.rotation += asteroid.rotSpeed;
+
+                // Wrap around screen
+                if (asteroid.x < -asteroid.size) asteroid.x = canvas.width + asteroid.size;
+                if (asteroid.x > canvas.width + asteroid.size) asteroid.x = -asteroid.size;
+                if (asteroid.y < -asteroid.size) asteroid.y = canvas.height + asteroid.size;
+                if (asteroid.y > canvas.height + asteroid.size) asteroid.y = -asteroid.size;
+
+                // Check collision with player
+                const dist = Math.sqrt((player.x - asteroid.x) ** 2 + (player.y - asteroid.y) ** 2);
+                if (dist < player.size + asteroid.size) {
+                    gameStats.health -= 2;
+
+                    // Create explosion particles
+                    for (let i = 0; i < 10; i++) {
+                        particles.push({
+                            x: player.x,
+                            y: player.y,
+                            vx: (Math.random() - 0.5) * 5,
+                            vy: (Math.random() - 0.5) * 5,
+                            life: 30,
+                            maxLife: 30,
+                            color: '#ff6b6b'
+                        });
+                    }
+                }
+            });
+        }
+
+        function updateParticles() {
+            particles = particles.filter(particle => {
+                particle.x += particle.vx;
+                particle.y += particle.vy;
+                particle.life--;
+
+                // Check laser collisions during flight
+                if (particle.type === 'laser' && particle.life > 0) {
+                    asteroids.forEach((asteroid, asteroidIndex) => {
+                        const dist = Math.sqrt((particle.x - asteroid.x) ** 2 + (particle.y - asteroid.y) ** 2);
+                        if (dist < particle.size + asteroid.size) {
+                            // Hit asteroid - destroy it
+                            asteroids.splice(asteroidIndex, 1);
+                            gameStats.score += 50;
+                            particle.life = 0; // Destroy laser
+
+                            // Create explosion particles
+                            for (let i = 0; i < 15; i++) {
+                                particles.push({
+                                    x: asteroid.x,
+                                    y: asteroid.y,
+                                    vx: (Math.random() - 0.5) * 6,
+                                    vy: (Math.random() - 0.5) * 6,
+                                    life: 25,
+                                    maxLife: 25,
+                                    color: Math.random() > 0.5 ? '#ff6b6b' : '#ffaa00',
+                                    type: 'explosion',
+                                    size: Math.random() * 4 + 2
+                                });
+                            }
+
+                            // Spawn a new asteroid after a delay
+                            setTimeout(() => {
+                                if (gameState === 'playing') {
+                                    asteroids.push({
+                                        x: Math.random() > 0.5 ? -50 : canvas.width + 50,
+                                        y: Math.random() * canvas.height,
+                                        vx: (Math.random() - 0.5) * 1,
+                                        vy: (Math.random() - 0.5) * 1,
+                                        size: Math.random() * 25 + 15,
+                                        rotation: 0,
+                                        rotSpeed: (Math.random() - 0.5) * 0.05
+                                    });
+                                }
+                            }, 2000);
+                        }
+                    });
+
+                    // Check laser vs alien collisions
+                    aliens.forEach((alien, alienIndex) => {
+                        const dist = Math.sqrt((particle.x - alien.x) ** 2 + (particle.y - alien.y) ** 2);
+                        if (dist < particle.size + alien.size) {
+                            alien.health--;
+                            particle.life = 0; // Destroy laser
+
+                            if (alien.health <= 0) {
+                                // Destroy alien
+                                aliens.splice(alienIndex, 1);
+                                gameStats.score += 150;
+
+                                // Create alien explosion
+                                for (let i = 0; i < 20; i++) {
+                                    particles.push({
+                                        x: alien.x,
+                                        y: alien.y,
+                                        vx: (Math.random() - 0.5) * 8,
+                                        vy: (Math.random() - 0.5) * 8,
+                                        life: 30,
+                                        maxLife: 30,
+                                        color: Math.random() > 0.5 ? '#00ff00' : '#ffff00',
+                                        type: 'explosion',
+                                        size: Math.random() * 5 + 2
+                                    });
+                                }
+
+                                // Spawn new alien after longer delay
+                                setTimeout(() => {
+                                    if (gameState === 'playing') {
+                                        aliens.push({
+                                            x: Math.random() > 0.5 ? -50 : canvas.width + 50,
+                                            y: Math.random() * canvas.height,
+                                            vx: (Math.random() - 0.5) * 1,
+                                            vy: (Math.random() - 0.5) * 1,
+                                            size: 12,
+                                            health: 2,
+                                            angle: Math.random() * Math.PI * 2,
+                                            attackCooldown: 0,
+                                            type: Math.random() > 0.5 ? 'scout' : 'fighter',
+                                            pulse: 0,
+                                            targetAngle: 0
+                                        });
+                                    }
+                                }, 5000);
+                            } else {
+                                // Hit but not destroyed - create hit particles
+                                for (let i = 0; i < 8; i++) {
+                                    particles.push({
+                                        x: alien.x,
+                                        y: alien.y,
+                                        vx: (Math.random() - 0.5) * 4,
+                                        vy: (Math.random() - 0.5) * 4,
+                                        life: 15,
+                                        maxLife: 15,
+                                        color: '#00ff00',
+                                        size: 2
+                                    });
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // Check alien projectile collisions with player - reduced damage
+                if (particle.type === 'alienProjectile' && particle.life > 0) {
+                    const dist = Math.sqrt((particle.x - player.x) ** 2 + (particle.y - player.y) ** 2);
+                    if (dist < particle.size + player.size) {
+                        gameStats.health -= 4;
+                        particle.life = 0;
+
+                        // Create hit particles
+                        for (let i = 0; i < 10; i++) {
+                            particles.push({
+                                x: player.x,
+                                y: player.y,
+                                vx: (Math.random() - 0.5) * 6,
+                                vy: (Math.random() - 0.5) * 6,
+                                life: 20,
+                                maxLife: 20,
+                                color: '#ff6b6b',
+                                size: 3
+                            });
+                        }
+                    }
+                }
+
+                return particle.life > 0;
+            });
+        }
+
+        function updateFuelPods() {
+            fuelPods.forEach(pod => {
+                if (!pod.collected) {
+                    pod.pulse += 0.1;
+
+                    // Check collision with player
+                    const dist = Math.sqrt((player.x - pod.x) ** 2 + (player.y - pod.y) ** 2);
+                    if (dist < player.size + pod.size) {
+                        pod.collected = true;
+                        gameStats.health = Math.min(100, gameStats.health + 15);
+                        gameStats.score += 100;
+
+                        // Create collection particles
+                        for (let i = 0; i < 8; i++) {
+                            particles.push({
+                                x: pod.x,
+                                y: pod.y,
+                                vx: (Math.random() - 0.5) * 3,
+                                vy: (Math.random() - 0.5) * 3,
+                                life: 20,
+                                maxLife: 20,
+                                color: '#4ecdc4'
+                            });
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateSystems() {
+            systems.forEach(system => {
+                if (!system.repaired) {
+                    system.pulse += 0.08;
+
+                    // Check collision with player
+                    const dist = Math.sqrt((player.x - system.x) ** 2 + (player.y - system.y) ** 2);
+                    if (dist < player.size + system.size) {
+                        system.repaired = true;
+                        gameStats.systems++;
+                        gameStats.score += 500;
+
+                        // Create repair particles
+                        for (let i = 0; i < 15; i++) {
+                            particles.push({
+                                x: system.x,
+                                y: system.y,
+                                vx: (Math.random() - 0.5) * 4,
+                                vy: (Math.random() - 0.5) * 4,
+                                life: 25,
+                                maxLife: 25,
+                                color: '#feca57'
+                            });
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateAliens() {
+            aliens.forEach((alien, alienIndex) => {
+                alien.pulse += 0.1;
+                alien.attackCooldown = Math.max(0, alien.attackCooldown - 1);
+
+                // Calculate distance and angle to player
+                const dx = player.x - alien.x;
+                const dy = player.y - alien.y;
+                const distToPlayer = Math.sqrt(dx * dx + dy * dy);
+                const angleToPlayer = Math.atan2(dy, dx);
+
+                // AI behavior based on alien type - much slower
+                if (alien.type === 'scout') {
+                    // Scouts circle around the player and shoot
+                    if (distToPlayer > 200) {
+                        // Move towards player
+                        alien.vx += Math.cos(angleToPlayer) * 0.04;
+                        alien.vy += Math.sin(angleToPlayer) * 0.04;
+                    } else if (distToPlayer < 150) {
+                        // Move away from player
+                        alien.vx -= Math.cos(angleToPlayer) * 0.06;
+                        alien.vy -= Math.sin(angleToPlayer) * 0.06;
+                    } else {
+                        // Circle around player
+                        const perpAngle = angleToPlayer + Math.PI / 2;
+                        alien.vx += Math.cos(perpAngle) * 0.05;
+                        alien.vy += Math.sin(perpAngle) * 0.05;
+                    }
+                } else {
+                    // Fighters are more aggressive and chase the player
+                    if (distToPlayer > 120) {
+                        alien.vx += Math.cos(angleToPlayer) * 0.06;
+                        alien.vy += Math.sin(angleToPlayer) * 0.06;
+                    }
+                }
+
+                // Apply more drag - slower movement
+                alien.vx *= 0.92;
+                alien.vy *= 0.92;
+
+                // Update position
+                alien.x += alien.vx;
+                alien.y += alien.vy;
+
+                // Wrap around screen
+                if (alien.x < 0) alien.x = canvas.width;
+                if (alien.x > canvas.width) alien.x = 0;
+                if (alien.y < 0) alien.y = canvas.height;
+                if (alien.y > canvas.height) alien.y = 0;
+
+                // Update angle to face movement direction
+                alien.angle = Math.atan2(alien.vy, alien.vx);
+
+                // Alien attacks - much slower attack rate
+                if (distToPlayer < 250 && alien.attackCooldown <= 0) {
+                    fireAlienProjectile(alien, angleToPlayer);
+                    alien.attackCooldown = alien.type === 'scout' ? 120 : 90; // Slower attack rates
+                }
+
+                // Check collision with player - reduced damage
+                if (distToPlayer < alien.size + player.size) {
+                    gameStats.health -= 1;
+
+                    // Create collision particles
+                    for (let i = 0; i < 8; i++) {
+                        particles.push({
+                            x: alien.x,
+                            y: alien.y,
+                            vx: (Math.random() - 0.5) * 5,
+                            vy: (Math.random() - 0.5) * 5,
+                            life: 20,
+                            maxLife: 20,
+                            color: '#ff6b6b',
+                            size: 3
+                        });
+                    }
+                }
+            });
+        }
+
+        function fireAlienProjectile(alien, angle) {
+            // Create alien projectile - slower speed
+            particles.push({
+                x: alien.x + Math.cos(angle) * alien.size,
+                y: alien.y + Math.sin(angle) * alien.size,
+                vx: Math.cos(angle) * 2.5,
+                vy: Math.sin(angle) * 2.5,
+                life: 60,
+                maxLife: 60,
+                color: '#00ff00',
+                type: 'alienProjectile',
+                size: 4
+            });
+        }
+
+        function fireLaser() {
+            // No fuel requirement - unlimited shooting
+
+            // Create a laser beam
+                const laserBeam = {
+                    x: player.x + Math.cos(player.angle) * player.size,
+                    y: player.y + Math.sin(player.angle) * player.size,
+                    vx: Math.cos(player.angle) * 12,
+                    vy: Math.sin(player.angle) * 12,
+                    life: 30,
+                    maxLife: 30,
+                    color: '#ff6b6b',
+                    type: 'laser',
+                    size: 3
+                };
+
+                particles.push(laserBeam);
+
+                // Create muzzle flash particles
+                for (let i = 0; i < 8; i++) {
+                    particles.push({
+                        x: player.x + Math.cos(player.angle) * player.size,
+                        y: player.y + Math.sin(player.angle) * player.size,
+                        vx: Math.cos(player.angle + (Math.random() - 0.5) * 0.5) * 3,
+                        vy: Math.sin(player.angle + (Math.random() - 0.5) * 0.5) * 3,
+                        life: 8,
+                        maxLife: 8,
+                        color: '#ffff00',
+                        type: 'flash',
+                        size: 2
+                    });
+                }
+
+            // Check laser collision with asteroids
+            checkLaserCollisions(laserBeam);
+        }
+
+        function checkLaserCollisions(laser) {
+            asteroids.forEach((asteroid, asteroidIndex) => {
+                const dist = Math.sqrt((laser.x - asteroid.x) ** 2 + (laser.y - asteroid.y) ** 2);
+                if (dist < laser.size + asteroid.size) {
+                    // Hit asteroid - destroy it
+                    asteroids.splice(asteroidIndex, 1);
+                    gameStats.score += 50;
+
+                    // Create explosion particles
+                    for (let i = 0; i < 15; i++) {
+                        particles.push({
+                            x: asteroid.x,
+                            y: asteroid.y,
+                            vx: (Math.random() - 0.5) * 6,
+                            vy: (Math.random() - 0.5) * 6,
+                            life: 25,
+                            maxLife: 25,
+                            color: Math.random() > 0.5 ? '#ff6b6b' : '#ffaa00',
+                            type: 'explosion',
+                            size: Math.random() * 4 + 2
+                        });
+                    }
+
+                    // Spawn a new asteroid after a delay
+                    setTimeout(() => {
+                        if (gameState === 'playing') {
+                            asteroids.push({
+                                x: Math.random() > 0.5 ? -50 : canvas.width + 50,
+                                y: Math.random() * canvas.height,
+                                vx: (Math.random() - 0.5) * 1,
+                                vy: (Math.random() - 0.5) * 1,
+                                size: Math.random() * 25 + 15,
+                                rotation: 0,
+                                rotSpeed: (Math.random() - 0.5) * 0.05
+                            });
+                        }
+                    }, 2000);
+                }
+            });
+        }
+
+        function checkGameState() {
+            if (gameStats.health <= 0) {
+                gameState = 'gameOver';
+                document.getElementById('gameOverMessage').textContent = 'Hull breach detected! The station has been destroyed.';
+                document.getElementById('gameOver').style.display = 'block';
+            } else if (gameStats.oxygen <= 0) {
+                gameState = 'gameOver';
+                document.getElementById('gameOverMessage').textContent = 'Oxygen depleted! Life support has failed.';
+                document.getElementById('gameOver').style.display = 'block';
+            } else if (gameStats.systems >= 3) {
+                gameState = 'victory';
+                document.getElementById('finalScore').textContent = gameStats.score;
+                document.getElementById('victory').style.display = 'block';
+            }
+        }
+
+        function render() {
+            // Clear canvas
+            ctx.fillStyle = 'rgba(0, 0, 17, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            if (gameState === 'playing') {
+                // Draw asteroids
+                ctx.fillStyle = '#666666';
+                asteroids.forEach(asteroid => {
+                    ctx.save();
+                    ctx.translate(asteroid.x, asteroid.y);
+                    ctx.rotate(asteroid.rotation);
+                    ctx.beginPath();
+                    for (let i = 0; i < 8; i++) {
+                        const angle = (i / 8) * Math.PI * 2;
+                        const radius = asteroid.size * (0.8 + Math.sin(i) * 0.2);
+                        const x = Math.cos(angle) * radius;
+                        const y = Math.sin(angle) * radius;
+                        if (i === 0) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.strokeStyle = '#888888';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    ctx.restore();
+                });
+
+                // Draw fuel pods
+                fuelPods.forEach(pod => {
+                    if (!pod.collected) {
+                        const alpha = 0.7 + Math.sin(pod.pulse) * 0.3;
+                        ctx.fillStyle = `rgba(78, 205, 196, ${alpha})`;
+                        ctx.beginPath();
+                        ctx.arc(pod.x, pod.y, pod.size, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        ctx.strokeStyle = '#4ecdc4';
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+                    }
+                });
+
+                // Draw systems
+                systems.forEach(system => {
+                    if (!system.repaired) {
+                        const alpha = 0.7 + Math.sin(system.pulse) * 0.3;
+                        ctx.fillStyle = `rgba(254, 202, 87, ${alpha})`;
+                        ctx.fillRect(system.x - system.size/2, system.y - system.size/2, system.size, system.size);
+
+                        ctx.strokeStyle = '#feca57';
+                        ctx.lineWidth = 3;
+                        ctx.strokeRect(system.x - system.size/2, system.y - system.size/2, system.size, system.size);
+                    }
+                });
+
+                // Draw particles
+                particles.forEach(particle => {
+                    const alpha = particle.life / particle.maxLife;
+
+                    if (particle.type === 'laser') {
+                        // Draw laser beams as lines
+                        ctx.strokeStyle = `rgba(255, 107, 107, ${alpha})`;
+                        ctx.lineWidth = particle.size;
+                        ctx.lineCap = 'round';
+                        ctx.beginPath();
+                        ctx.moveTo(particle.x, particle.y);
+                        ctx.lineTo(particle.x + particle.vx * 2, particle.y + particle.vy * 2);
+                        ctx.stroke();
+
+                        // Add glow effect
+                        ctx.shadowColor = '#ff6b6b';
+                        ctx.shadowBlur = 10;
+                        ctx.stroke();
+                        ctx.shadowBlur = 0;
+                    } else if (particle.type === 'alienProjectile') {
+                        // Draw alien projectiles as glowing green orbs
+                        ctx.fillStyle = `rgba(0, 255, 0, ${alpha})`;
+                        ctx.shadowColor = '#00ff00';
+                        ctx.shadowBlur = 8;
+                        ctx.beginPath();
+                        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.shadowBlur = 0;
+                    } else {
+                        // Draw other particles as circles
+                        const size = particle.size || 2;
+                        ctx.fillStyle = particle.color.replace(')', `, ${alpha})`).replace('rgb', 'rgba');
+                        ctx.beginPath();
+                        ctx.arc(particle.x, particle.y, size, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                });
+
+                // Draw aliens
+                aliens.forEach(alien => {
+                    ctx.save();
+                    ctx.translate(alien.x, alien.y);
+                    ctx.rotate(alien.angle);
+
+                    // Different appearance for different alien types
+                    if (alien.type === 'scout') {
+                        // Scout - smaller, triangular
+                        const alpha = 0.8 + Math.sin(alien.pulse) * 0.2;
+                        ctx.fillStyle = `rgba(0, 255, 100, ${alpha})`;
+                        ctx.strokeStyle = '#00ff00';
+                        ctx.lineWidth = 2;
+
+                        ctx.beginPath();
+                        ctx.moveTo(alien.size, 0);
+                        ctx.lineTo(-alien.size * 0.7, -alien.size * 0.5);
+                        ctx.lineTo(-alien.size * 0.5, 0);
+                        ctx.lineTo(-alien.size * 0.7, alien.size * 0.5);
+                        ctx.closePath();
+                        ctx.fill();
+                        ctx.stroke();
+
+                        // Scout energy core
+                        ctx.fillStyle = '#ffff00';
+                        ctx.beginPath();
+                        ctx.arc(0, 0, alien.size * 0.3, 0, Math.PI * 2);
+                        ctx.fill();
+                    } else {
+                        // Fighter - larger, more angular
+                        const alpha = 0.9 + Math.sin(alien.pulse * 0.8) * 0.1;
+                        ctx.fillStyle = `rgba(255, 100, 0, ${alpha})`;
+                        ctx.strokeStyle = '#ff6600';
+                        ctx.lineWidth = 2;
+
+                        ctx.beginPath();
+                        ctx.moveTo(alien.size, 0);
+                        ctx.lineTo(-alien.size * 0.8, -alien.size * 0.7);
+                        ctx.lineTo(-alien.size * 0.6, -alien.size * 0.3);
+                        ctx.lineTo(-alien.size * 0.6, alien.size * 0.3);
+                        ctx.lineTo(-alien.size * 0.8, alien.size * 0.7);
+                        ctx.closePath();
+                        ctx.fill();
+                        ctx.stroke();
+
+                        // Fighter weapon pods
+                        ctx.fillStyle = '#ff0000';
+                        ctx.fillRect(-alien.size * 0.3, -alien.size * 0.6, alien.size * 0.2, alien.size * 0.4);
+                        ctx.fillRect(-alien.size * 0.3, alien.size * 0.2, alien.size * 0.2, alien.size * 0.4);
+                    }
+
+                    // Health indicator (damage effect)
+                    if (alien.health < 2) {
+                        ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+                        ctx.fillRect(-alien.size, -alien.size, alien.size * 2, alien.size * 2);
+                    }
+
+                    ctx.restore();
+
+                    // Alien glow effect
+                    ctx.shadowColor = alien.type === 'scout' ? '#00ff00' : '#ff6600';
+                    ctx.shadowBlur = 15;
+                    ctx.globalAlpha = 0.3;
+                    ctx.fillStyle = alien.type === 'scout' ? '#00ff00' : '#ff6600';
+                    ctx.beginPath();
+                    ctx.arc(alien.x, alien.y, alien.size + 5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                    ctx.globalAlpha = 1;
+                });
+
+                // Draw player
+                ctx.save();
+                ctx.translate(player.x, player.y);
+                ctx.rotate(player.angle);
+
+                // Ship body
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.moveTo(player.size, 0);
+                ctx.lineTo(-player.size * 0.7, -player.size * 0.5);
+                ctx.lineTo(-player.size * 0.5, 0);
+                ctx.lineTo(-player.size * 0.7, player.size * 0.5);
+                ctx.closePath();
+                ctx.fill();
+
+                // Ship outline
+                ctx.strokeStyle = '#4ecdc4';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Engine glow
+                if (keys['w'] || keys['s'] || keys['a'] || keys['d']) {
+                    ctx.fillStyle = '#ff6b6b';
+                    ctx.beginPath();
+                    ctx.moveTo(-player.size * 0.7, -player.size * 0.3);
+                    ctx.lineTo(-player.size * 1.2, 0);
+                    ctx.lineTo(-player.size * 0.7, player.size * 0.3);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+
+                ctx.restore();
+
+                // Draw crosshair at mouse position
+                ctx.strokeStyle = '#ff6b6b';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(mouse.x, mouse.y, 10, 0, Math.PI * 2);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(mouse.x - 15, mouse.y);
+                ctx.lineTo(mouse.x - 5, mouse.y);
+                ctx.moveTo(mouse.x + 5, mouse.y);
+                ctx.lineTo(mouse.x + 15, mouse.y);
+                ctx.moveTo(mouse.x, mouse.y - 15);
+                ctx.lineTo(mouse.x, mouse.y - 5);
+                ctx.moveTo(mouse.x, mouse.y + 5);
+                ctx.lineTo(mouse.x, mouse.y + 15);
+                ctx.stroke();
+            }
+        }
+
+        function updateHUD() {
+            document.getElementById('health').textContent = Math.max(0, Math.round(gameStats.health));
+            document.getElementById('oxygen').textContent = Math.max(0, Math.round(gameStats.oxygen));
+            document.getElementById('systems').textContent = gameStats.systems;
+            document.getElementById('score').textContent = gameStats.score;
+        }
+
+        function restartGame() {
+            document.getElementById('gameOver').style.display = 'none';
+            document.getElementById('victory').style.display = 'none';
+            startGame();
+        }
+
+        function goBack() {
+            // Check if we came from the portfolio (via URL parameter)
+            const urlParams = new URLSearchParams(window.location.search);
+            const fromPortfolio = urlParams.get('from') === 'portfolio';
+
+            // Try to get portfolio URL from sessionStorage
+            let portfolioUrl = './index.html'; // Default fallback
+            try {
+                const storedUrl = sessionStorage.getItem('portfolioUrl');
+                if (storedUrl && storedUrl.includes(window.location.origin)) {
+                    portfolioUrl = storedUrl;
+                }
+            } catch (e) {
+                // SessionStorage not available or accessible
+                console.log('Cannot access sessionStorage');
+            }
+
+            // Try to determine the best navigation method
+            if (window.history.length > 1 && document.referrer &&
+                (document.referrer.includes(window.location.origin) || fromPortfolio)) {
+                // If we have history and came from the same origin, try going back
+                try {
+                    window.history.back();
+                    // Fallback: if history.back() doesn't work after a short delay
+                    setTimeout(() => {
+                        if (window.location.href.includes('one-left-game.html')) {
+                            window.location.href = portfolioUrl;
+                        }
+                    }, 1000);
+                } catch (e) {
+                    // If history.back() fails, navigate directly
+                    window.location.href = portfolioUrl;
+                }
+            } else {
+                // No reliable history or came from external source - navigate directly
+                window.location.href = portfolioUrl;
+            }
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>

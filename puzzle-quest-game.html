@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puzzle Quest - By Rowan</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            color: white;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .puzzle-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 2rem;
+        }
+
+        .puzzle-tile {
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .puzzle-tile:hover {
+            transform: scale(0.95);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .puzzle-tile.empty {
+            background: rgba(102, 126, 234, 0.2);
+            cursor: default;
+        }
+
+        .puzzle-tile.empty:hover {
+            transform: none;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .message {
+            text-align: center;
+            margin: 1rem 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #667eea;
+            min-height: 30px;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: white;
+            color: #667eea;
+            padding: 0.8rem 1.5rem;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Portfolio
+    </a>
+
+    <div class="game-container">
+        <div class="header">
+            <h1><i class="fas fa-puzzle-piece"></i> Puzzle Quest</h1>
+            <p>Arrange the tiles in order!</p>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-label">Moves</div>
+                <div class="stat-value" id="moves">0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Time</div>
+                <div class="stat-value" id="time">0:00</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Level</div>
+                <div class="stat-value" id="level">1</div>
+            </div>
+        </div>
+
+        <div class="message" id="message"></div>
+
+        <div class="puzzle-grid" id="puzzleGrid"></div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="shufflePuzzle()">
+                <i class="fas fa-random"></i> Shuffle
+            </button>
+            <button class="btn btn-secondary" onclick="resetGame()">
+                <i class="fas fa-redo"></i> Reset
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let tiles = [1, 2, 3, 4, 5, 6, 7, 8, 0];
+        let moves = 0;
+        let seconds = 0;
+        let timerInterval = null;
+        let level = 1;
+        let gameStarted = false;
+
+        function initGame() {
+            renderPuzzle();
+            shufflePuzzle();
+        }
+
+        function renderPuzzle() {
+            const grid = document.getElementById('puzzleGrid');
+            grid.innerHTML = '';
+
+            tiles.forEach((tile, index) => {
+                const button = document.createElement('button');
+                button.className = tile === 0 ? 'puzzle-tile empty' : 'puzzle-tile';
+                button.textContent = tile === 0 ? '' : tile;
+                button.onclick = () => moveTile(index);
+                grid.appendChild(button);
+            });
+        }
+
+        function moveTile(index) {
+            if (!gameStarted) {
+                startTimer();
+                gameStarted = true;
+            }
+
+            const emptyIndex = tiles.indexOf(0);
+            const row = Math.floor(index / 3);
+            const col = index % 3;
+            const emptyRow = Math.floor(emptyIndex / 3);
+            const emptyCol = emptyIndex % 3;
+
+            const isAdjacent = (Math.abs(row - emptyRow) === 1 && col === emptyCol) ||
+                             (Math.abs(col - emptyCol) === 1 && row === emptyRow);
+
+            if (isAdjacent) {
+                [tiles[index], tiles[emptyIndex]] = [tiles[emptyIndex], tiles[index]];
+                moves++;
+                document.getElementById('moves').textContent = moves;
+                renderPuzzle();
+                checkWin();
+            }
+        }
+
+        function shufflePuzzle() {
+            // Fisher-Yates shuffle
+            for (let i = tiles.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [tiles[i], tiles[j]] = [tiles[j], tiles[i]];
+            }
+
+            // Make sure puzzle is solvable
+            while (!isSolvable()) {
+                for (let i = tiles.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [tiles[i], tiles[j]] = [tiles[j], tiles[i]];
+                }
+            }
+
+            renderPuzzle();
+            document.getElementById('message').textContent = '';
+        }
+
+        function isSolvable() {
+            let inversions = 0;
+            for (let i = 0; i < tiles.length; i++) {
+                for (let j = i + 1; j < tiles.length; j++) {
+                    if (tiles[i] && tiles[j] && tiles[i] > tiles[j]) {
+                        inversions++;
+                    }
+                }
+            }
+            return inversions % 2 === 0;
+        }
+
+        function checkWin() {
+            const solved = tiles.every((tile, index) => {
+                if (index === 8) return tile === 0;
+                return tile === index + 1;
+            });
+
+            if (solved) {
+                stopTimer();
+                document.getElementById('message').textContent = '🎉 Puzzle Solved!';
+                setTimeout(() => {
+                    level++;
+                    document.getElementById('level').textContent = level;
+                    resetGame();
+                    alert(`Congratulations! Level ${level - 1} completed!\nMoves: ${moves}\nTime: ${formatTime(seconds)}\n\nStarting Level ${level}...`);
+                }, 500);
+            }
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                seconds++;
+                document.getElementById('time').textContent = formatTime(seconds);
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
+        function formatTime(sec) {
+            const minutes = Math.floor(sec / 60);
+            const secs = sec % 60;
+            return `${minutes}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function resetGame() {
+            moves = 0;
+            seconds = 0;
+            gameStarted = false;
+            document.getElementById('moves').textContent = '0';
+            document.getElementById('time').textContent = '0:00';
+            document.getElementById('message').textContent = '';
+            stopTimer();
+            shufflePuzzle();
+        }
+
+        // Initialize game on load
+        initGame();
+    </script>
+</body>
+</html>

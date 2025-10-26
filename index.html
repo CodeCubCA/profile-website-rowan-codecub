@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rowan - Student Profile</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <header class="header">
+            <nav class="nav">
+                <div class="nav-logo">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Rowan</span>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#games">Games</a></li>
+                    <li><a href="#skills">Skills</a></li>
+                </ul>
+                <div class="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Hero Section -->
+        <section id="home" class="hero">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1>Hi, I'm Rowan</h1>
+                    <p class="hero-subtitle">Python Student</p>
+                    <p class="hero-description">Passionate about coding, learning new technologies, and building awesome projects. I'm 12 years old and love exploring Python programming.</p>
+                    <div class="hero-buttons">
+                        <a href="#games" class="btn btn-secondary">Play Games</a>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <div class="profile-card">
+                        <div class="profile-img">
+                            <i class="fas fa-user-graduate"></i>
+                        </div>
+                        <div class="profile-info">
+                            <h3>Rowan</h3>
+                            <p>Python Student</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="about">
+            <div class="section-header">
+                <h2>About Me</h2>
+                <p>Get to know me better</p>
+            </div>
+            <div class="about-content">
+                <div class="about-text">
+                    <p>I'm a dedicated 12-year-old Python student with a passion for technology and innovation. I love solving problems and turning ideas into reality through code.</p>
+                    <div class="about-stats">
+                        <div class="stat">
+                            <h3>2+</h3>
+                            <p>Years of Coding</p>
+                        </div>
+                        <div class="stat">
+                            <h3>3.8</h3>
+                            <p>GPA</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-education">
+                    <h3>Education</h3>
+                    <div class="education-item">
+                        <div class="education-icon">
+                            <i class="fas fa-university"></i>
+                        </div>
+                        <div class="education-details">
+                            <h4>Python Programming</h4>
+                            <p>Self-taught & Online Courses</p>
+                            <span>2022 - Present</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Skills Section -->
+        <section id="skills" class="skills">
+            <div class="section-header">
+                <h2>Skills & Technologies</h2>
+                <p>Tools and languages I work with</p>
+            </div>
+            <div class="skills-grid">
+                <div class="skill-card">
+                    <i class="fab fa-python"></i>
+                    <h3>Python</h3>
+                    <div class="skill-bar">
+                        <div class="skill-progress" data-progress="90"></div>
+                    </div>
+                </div>
+                <div class="skill-card">
+                    <i class="fas fa-robot"></i>
+                    <h3>Claude</h3>
+                    <div class="skill-bar">
+                        <div class="skill-progress" data-progress="85"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- Games Section -->
+        <section id="games" class="games">
+            <div class="section-header">
+                <h2>My Games</h2>
+                <p>Interactive experiences and adventures</p>
+            </div>
+            <div class="games-grid">
+                <div class="game-card space-adventure">
+                    <div class="game-image">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <div class="game-content">
+                        <h3>Time Traveler</h3>
+                        <p class="game-status">Coming Soon!</p>
+                        <p class="game-description">Embark on an epic space adventure through time and dimensions. Explore alien worlds, solve temporal puzzles, and save the universe!</p>
+                        <div class="game-tech">
+                            <span>JavaScript</span>
+                            <span>Canvas</span>
+                            <span>WebGL</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="game-card one-left" onclick="openGame('oneLeft')">
+                    <div class="game-image">
+                        <i class="fas fa-user-astronaut"></i>
+                    </div>
+                    <div class="game-content">
+                        <h3>One Left</h3>
+                        <p class="game-status">Play Now!</p>
+                        <p class="game-description">You're the last survivor on a damaged space station. Navigate through asteroid fields, repair systems, and find your way home in this intense survival adventure.</p>
+                        <div class="game-tech">
+                            <span>HTML5</span>
+                            <span>JavaScript</span>
+                            <span>Canvas</span>
+                        </div>
+                        <div class="game-play-button">
+                            <span>▶ Launch Game</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="game-card snake-game" onclick="openGame('snakeOdyssey')">
+                    <div class="game-image">
+                        <i class="fas fa-dragon"></i>
+                    </div>
+                    <div class="game-content">
+                        <h3>Snake Odyssey</h3>
+                        <p class="game-status">Play Now!</p>
+                        <p class="game-description">Classic snake game with a modern twist! Collect power-ups, avoid obstacles, and grow your snake to become the ultimate serpent master.</p>
+                        <div class="game-tech">
+                            <span>Python</span>
+                            <span>Pygame</span>
+                            <span>AI</span>
+                        </div>
+                        <div class="game-play-button">
+                            <span>▶ Launch Game</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="game-card puzzle-quest" onclick="openGame('puzzleQuest')">
+                    <div class="game-image">
+                        <i class="fas fa-puzzle-piece"></i>
+                    </div>
+                    <div class="game-content">
+                        <h3>Puzzle Quest</h3>
+                        <p class="game-status">Beta Version</p>
+                        <p class="game-description">Mind-bending puzzles that challenge your logic and creativity. Solve increasingly complex challenges and unlock new levels in this brain-teasing adventure.</p>
+                        <div class="game-tech">
+                            <span>JavaScript</span>
+                            <span>CSS3</span>
+                            <span>Logic</span>
+                        </div>
+                        <div class="game-play-button">
+                            <span>▶ Launch Game</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="game-card math-runner" onclick="openGame('mathRunner')">
+                    <div class="game-image">
+                        <i class="fas fa-calculator"></i>
+                    </div>
+                    <div class="game-content">
+                        <h3>Math Runner</h3>
+                        <p class="game-status">Play Now!</p>
+                        <p class="game-description">Run, jump, and solve math problems on the go! An educational endless runner that makes learning arithmetic fun and exciting.</p>
+                        <div class="game-tech">
+                            <span>HTML5</span>
+                            <span>JavaScript</span>
+                            <span>Education</span>
+                        </div>
+                        <div class="game-play-button">
+                            <span>▶ Launch Game</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="game-card code-warrior">
+                    <div class="game-image">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <div class="game-content">
+                        <h3>Code Warrior</h3>
+                        <p class="game-status">Coming Soon!</p>
+                        <p class="game-description">Battle bugs and debug your way through challenging coding scenarios. Learn programming concepts while fighting digital monsters in this RPG-style adventure.</p>
+                        <div class="game-tech">
+                            <span>React</span>
+                            <span>Node.js</span>
+                            <span>MongoDB</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="game-card pixel-art" onclick="openGame('pixelArt')">
+                    <div class="game-image">
+                        <i class="fas fa-paint-brush"></i>
+                    </div>
+                    <div class="game-content">
+                        <h3>Pixel Art Studio</h3>
+                        <p class="game-status">Play Now!</p>
+                        <p class="game-description">Create stunning pixel art masterpieces with an intuitive drawing tool. Share your creations and explore a gallery of community artwork.</p>
+                        <div class="game-tech">
+                            <span>Canvas API</span>
+                            <span>JavaScript</span>
+                            <span>Creative</span>
+                        </div>
+                        <div class="game-play-button">
+                            <span>▶ Launch Game</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="game-card memory-maze" onclick="openGame('memoryMaze')">
+                    <div class="game-image">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <div class="game-content">
+                        <h3>Memory Maze</h3>
+                        <p class="game-status">Beta Version</p>
+                        <p class="game-description">Test your memory and navigation skills in procedurally generated mazes. Remember the path, collect items, and escape before time runs out!</p>
+                        <div class="game-tech">
+                            <span>JavaScript</span>
+                            <span>WebGL</span>
+                            <span>Algorithms</span>
+                        </div>
+                        <div class="game-play-button">
+                            <span>▶ Launch Game</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <p>&copy; 2024 Rowan. Made with <i class="fas fa-heart"></i> by a student.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-github"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Runner - By Rowan</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            overflow: hidden;
+        }
+
+        #gameCanvas {
+            display: block;
+            background: linear-gradient(to bottom, #87CEEB 0%, #E0F6FF 100%);
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: white;
+            color: #ff6b6b;
+            padding: 0.8rem 1.5rem;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-over {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            display: none;
+            z-index: 1000;
+        }
+
+        .game-over h2 {
+            color: #ff6b6b;
+            margin-bottom: 1rem;
+        }
+
+        .game-over button {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        .game-over button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back
+    </a>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <div class="game-over" id="gameOver">
+        <h2>Game Over!</h2>
+        <p id="finalScore">Score: 0</p>
+        <p id="finalCorrect">Correct: 0</p>
+        <button onclick="restartGame()">Play Again</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Game variables
+        let player = {
+            x: 100,
+            y: canvas.height - 150,
+            width: 40,
+            height: 60,
+            velocityY: 0,
+            jumping: false,
+            color: '#ff6b6b'
+        };
+
+        let obstacles = [];
+        let score = 0;
+        let correctAnswers = 0;
+        let gameSpeed = 3;
+        let gravity = 0.6;
+        let jumpPower = -15;
+        let gameRunning = true;
+        let currentQuestion = null;
+        let frameCount = 0;
+
+        // Question generation
+        function generateQuestion() {
+            const operators = ['+', '-', '*'];
+            const operator = operators[Math.floor(Math.random() * operators.length)];
+            let num1, num2, answer;
+
+            switch(operator) {
+                case '+':
+                    num1 = Math.floor(Math.random() * 20) + 1;
+                    num2 = Math.floor(Math.random() * 20) + 1;
+                    answer = num1 + num2;
+                    break;
+                case '-':
+                    num1 = Math.floor(Math.random() * 20) + 10;
+                    num2 = Math.floor(Math.random() * num1);
+                    answer = num1 - num2;
+                    break;
+                case '*':
+                    num1 = Math.floor(Math.random() * 10) + 1;
+                    num2 = Math.floor(Math.random() * 10) + 1;
+                    answer = num1 * num2;
+                    break;
+            }
+
+            const wrongAnswer1 = answer + Math.floor(Math.random() * 10) - 5;
+            const wrongAnswer2 = answer + Math.floor(Math.random() * 10) + 5;
+            const answers = [answer, wrongAnswer1, wrongAnswer2].sort(() => Math.random() - 0.5);
+
+            return {
+                question: `${num1} ${operator} ${num2}`,
+                correctAnswer: answer,
+                answers: answers
+            };
+        }
+
+        // Create obstacle
+        function createObstacle() {
+            if (!currentQuestion) {
+                currentQuestion = generateQuestion();
+            }
+
+            const answer = currentQuestion.answers[obstacles.length % 3];
+            const isCorrect = answer === currentQuestion.correctAnswer;
+
+            obstacles.push({
+                x: canvas.width,
+                y: canvas.height - 100,
+                width: 60,
+                height: 60,
+                answer: answer,
+                isCorrect: isCorrect,
+                color: isCorrect ? '#4ecdc4' : '#95a5a6'
+            });
+
+            if (obstacles.length % 3 === 0) {
+                currentQuestion = null;
+            }
+        }
+
+        // Draw player
+        function drawPlayer() {
+            ctx.fillStyle = player.color;
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+
+            // Draw eyes
+            ctx.fillStyle = 'white';
+            ctx.fillRect(player.x + 8, player.y + 15, 10, 10);
+            ctx.fillRect(player.x + 22, player.y + 15, 10, 10);
+
+            ctx.fillStyle = 'black';
+            ctx.fillRect(player.x + 12, player.y + 19, 4, 4);
+            ctx.fillRect(player.x + 26, player.y + 19, 4, 4);
+        }
+
+        // Draw obstacles
+        function drawObstacles() {
+            obstacles.forEach(obs => {
+                ctx.fillStyle = obs.color;
+                ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 20px Poppins';
+                ctx.textAlign = 'center';
+                ctx.fillText(obs.answer, obs.x + obs.width / 2, obs.y + obs.height / 2 + 7);
+            });
+        }
+
+        // Draw UI
+        function drawUI() {
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 24px Poppins';
+            ctx.textAlign = 'left';
+            ctx.fillText(`Score: ${score}`, 20, 50);
+            ctx.fillText(`Correct: ${correctAnswers}`, 20, 80);
+
+            if (currentQuestion) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(canvas.width / 2 - 150, 20, 300, 60);
+
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 28px Poppins';
+                ctx.textAlign = 'center';
+                ctx.fillText(currentQuestion.question + ' = ?', canvas.width / 2, 60);
+            }
+
+            // Draw ground
+            ctx.fillStyle = '#8B4513';
+            ctx.fillRect(0, canvas.height - 40, canvas.width, 40);
+        }
+
+        // Update game
+        function update() {
+            if (!gameRunning) return;
+
+            frameCount++;
+
+            // Update player
+            player.velocityY += gravity;
+            player.y += player.velocityY;
+
+            if (player.y > canvas.height - 150) {
+                player.y = canvas.height - 150;
+                player.jumping = false;
+                player.velocityY = 0;
+            }
+
+            // Create obstacles
+            if (frameCount % 120 === 0) {
+                createObstacle();
+            }
+
+            // Update obstacles
+            obstacles.forEach((obs, index) => {
+                obs.x -= gameSpeed;
+
+                // Check collision
+                if (player.x < obs.x + obs.width &&
+                    player.x + player.width > obs.x &&
+                    player.y < obs.y + obs.height &&
+                    player.y + player.height > obs.y) {
+
+                    if (obs.isCorrect) {
+                        score += 10;
+                        correctAnswers++;
+                        obstacles.splice(index, 1);
+                        gameSpeed += 0.1;
+                    } else {
+                        endGame();
+                    }
+                }
+
+                // Remove off-screen obstacles
+                if (obs.x + obs.width < 0) {
+                    obstacles.splice(index, 1);
+                }
+            });
+
+            score++;
+        }
+
+        // Draw game
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw sky
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#87CEEB');
+            gradient.addColorStop(1, '#E0F6FF');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            drawUI();
+            drawPlayer();
+            drawObstacles();
+        }
+
+        // Game loop
+        function gameLoop() {
+            update();
+            draw();
+            if (gameRunning) {
+                requestAnimationFrame(gameLoop);
+            }
+        }
+
+        // End game
+        function endGame() {
+            gameRunning = false;
+            document.getElementById('finalScore').textContent = `Score: ${score}`;
+            document.getElementById('finalCorrect').textContent = `Correct Answers: ${correctAnswers}`;
+            document.getElementById('gameOver').style.display = 'block';
+        }
+
+        // Restart game
+        function restartGame() {
+            player.y = canvas.height - 150;
+            player.velocityY = 0;
+            player.jumping = false;
+            obstacles = [];
+            score = 0;
+            correctAnswers = 0;
+            gameSpeed = 3;
+            gameRunning = true;
+            currentQuestion = null;
+            frameCount = 0;
+            document.getElementById('gameOver').style.display = 'none';
+            gameLoop();
+        }
+
+        // Controls
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && !player.jumping && gameRunning) {
+                player.velocityY = jumpPower;
+                player.jumping = true;
+            }
+        });
+
+        canvas.addEventListener('click', () => {
+            if (!player.jumping && gameRunning) {
+                player.velocityY = jumpPower;
+                player.jumping = true;
+            }
+        });
+
+        // Handle resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            player.y = canvas.height - 150;
+        });
+
+        // Start game
+        gameLoop();
+    </script>
+</body>
+</html>

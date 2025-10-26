@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Maze - By Rowan</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            max-width: 700px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            color: white;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        #mazeCanvas {
+            border: 3px solid #667eea;
+            border-radius: 10px;
+            display: block;
+            margin: 0 auto 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: white;
+            color: #667eea;
+            padding: 0.8rem 1.5rem;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .message {
+            text-align: center;
+            margin: 1rem 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #667eea;
+            min-height: 30px;
+        }
+
+        .phase-indicator {
+            text-align: center;
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            font-weight: 600;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Portfolio
+    </a>
+
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-brain"></i> Memory Maze</h1>
+            <p>Remember the path and navigate the maze!</p>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-label">Level</div>
+                <div class="stat-value" id="level">1</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Score</div>
+                <div class="stat-value" id="score">0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Items</div>
+                <div class="stat-value" id="items">0</div>
+            </div>
+        </div>
+
+        <div class="phase-indicator" id="phase">Memorize the path!</div>
+        <div class="message" id="message"></div>
+
+        <canvas id="mazeCanvas" width="500" height="500"></canvas>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="startGame()">
+                <i class="fas fa-play"></i> Start Game
+            </button>
+            <button class="btn btn-secondary" onclick="resetGame()">
+                <i class="fas fa-redo"></i> Reset
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('mazeCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const gridSize = 10;
+        const cellSize = canvas.width / gridSize;
+
+        let level = 1;
+        let score = 0;
+        let itemsCollected = 0;
+        let player = { x: 0, y: 0 };
+        let exit = { x: 9, y: 9 };
+        let items = [];
+        let maze = [];
+        let correctPath = [];
+        let playerPath = [];
+        let gamePhase = 'memorize'; // memorize, play, complete
+        let showingPath = false;
+
+        // Generate maze
+        function generateMaze() {
+            maze = Array(gridSize).fill().map(() => Array(gridSize).fill(0));
+
+            // Simple path generation
+            let x = 0, y = 0;
+            correctPath = [{ x: 0, y: 0 }];
+
+            while (x < gridSize - 1 || y < gridSize - 1) {
+                maze[y][x] = 1;
+
+                const canGoRight = x < gridSize - 1;
+                const canGoDown = y < gridSize - 1;
+
+                if (canGoRight && canGoDown) {
+                    if (Math.random() > 0.5) {
+                        x++;
+                    } else {
+                        y++;
+                    }
+                } else if (canGoRight) {
+                    x++;
+                } else if (canGoDown) {
+                    y++;
+                }
+
+                correctPath.push({ x, y });
+            }
+            maze[y][x] = 1;
+
+            // Add some extra paths
+            for (let i = 0; i < gridSize * 2; i++) {
+                const rx = Math.floor(Math.random() * gridSize);
+                const ry = Math.floor(Math.random() * gridSize);
+                maze[ry][rx] = 1;
+            }
+
+            // Generate items along the path
+            items = [];
+            const numItems = Math.min(3 + level, correctPath.length - 2);
+            for (let i = 0; i < numItems; i++) {
+                const index = Math.floor(Math.random() * (correctPath.length - 2)) + 1;
+                items.push({ ...correctPath[index], collected: false });
+            }
+        }
+
+        // Draw maze
+        function drawMaze() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw cells
+            for (let y = 0; y < gridSize; y++) {
+                for (let x = 0; x < gridSize; x++) {
+                    if (maze[y][x] === 1) {
+                        ctx.fillStyle = '#f0f0f0';
+                    } else {
+                        ctx.fillStyle = '#333';
+                    }
+                    ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+
+                    // Grid lines
+                    ctx.strokeStyle = '#ddd';
+                    ctx.strokeRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                }
+            }
+
+            // Draw correct path during memorize phase
+            if (showingPath) {
+                correctPath.forEach((pos, index) => {
+                    if (index < correctPath.length - 1) {
+                        const next = correctPath[index + 1];
+                        ctx.strokeStyle = 'rgba(102, 126, 234, 0.5)';
+                        ctx.lineWidth = 8;
+                        ctx.beginPath();
+                        ctx.moveTo(pos.x * cellSize + cellSize / 2, pos.y * cellSize + cellSize / 2);
+                        ctx.lineTo(next.x * cellSize + cellSize / 2, next.y * cellSize + cellSize / 2);
+                        ctx.stroke();
+                    }
+                });
+            }
+
+            // Draw items
+            items.forEach(item => {
+                if (!item.collected) {
+                    ctx.fillStyle = '#ffd700';
+                    ctx.beginPath();
+                    ctx.arc(
+                        item.x * cellSize + cellSize / 2,
+                        item.y * cellSize + cellSize / 2,
+                        cellSize / 4,
+                        0,
+                        Math.PI * 2
+                    );
+                    ctx.fill();
+                }
+            });
+
+            // Draw exit
+            ctx.fillStyle = '#4ecdc4';
+            ctx.fillRect(exit.x * cellSize, exit.y * cellSize, cellSize, cellSize);
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 30px Poppins';
+            ctx.textAlign = 'center';
+            ctx.fillText('🚪', exit.x * cellSize + cellSize / 2, exit.y * cellSize + cellSize / 2 + 10);
+
+            // Draw player
+            ctx.fillStyle = '#667eea';
+            ctx.beginPath();
+            ctx.arc(
+                player.x * cellSize + cellSize / 2,
+                player.y * cellSize + cellSize / 2,
+                cellSize / 3,
+                0,
+                Math.PI * 2
+            );
+            ctx.fill();
+        }
+
+        // Start game
+        function startGame() {
+            gamePhase = 'memorize';
+            showingPath = true;
+            document.getElementById('phase').textContent = 'Memorize the path!';
+            document.getElementById('message').textContent = '';
+            generateMaze();
+            drawMaze();
+
+            // Show path for a few seconds
+            setTimeout(() => {
+                showingPath = false;
+                gamePhase = 'play';
+                document.getElementById('phase').textContent = 'Navigate the maze!';
+                drawMaze();
+            }, 3000 + level * 500);
+        }
+
+        // Move player
+        function movePlayer(dx, dy) {
+            if (gamePhase !== 'play') return;
+
+            const newX = player.x + dx;
+            const newY = player.y + dy;
+
+            // Check bounds and if path exists
+            if (newX >= 0 && newX < gridSize && newY >= 0 && newY < gridSize && maze[newY][newX] === 1) {
+                player.x = newX;
+                player.y = newY;
+
+                // Check for items
+                items.forEach(item => {
+                    if (!item.collected && item.x === player.x && item.y === player.y) {
+                        item.collected = true;
+                        itemsCollected++;
+                        score += 10;
+                        document.getElementById('items').textContent = itemsCollected;
+                        document.getElementById('score').textContent = score;
+                    }
+                });
+
+                // Check for exit
+                if (player.x === exit.x && player.y === exit.y) {
+                    levelComplete();
+                }
+
+                drawMaze();
+            }
+        }
+
+        // Level complete
+        function levelComplete() {
+            gamePhase = 'complete';
+            score += 50 * level;
+            level++;
+            document.getElementById('level').textContent = level;
+            document.getElementById('score').textContent = score;
+            document.getElementById('message').textContent = '🎉 Level Complete!';
+            document.getElementById('phase').textContent = 'Click Start to continue!';
+
+            player = { x: 0, y: 0 };
+        }
+
+        // Reset game
+        function resetGame() {
+            level = 1;
+            score = 0;
+            itemsCollected = 0;
+            player = { x: 0, y: 0 };
+            gamePhase = 'memorize';
+            document.getElementById('level').textContent = level;
+            document.getElementById('score').textContent = score;
+            document.getElementById('items').textContent = itemsCollected;
+            document.getElementById('message').textContent = '';
+            startGame();
+        }
+
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case 'ArrowUp':
+                case 'w':
+                    movePlayer(0, -1);
+                    e.preventDefault();
+                    break;
+                case 'ArrowDown':
+                case 's':
+                    movePlayer(0, 1);
+                    e.preventDefault();
+                    break;
+                case 'ArrowLeft':
+                case 'a':
+                    movePlayer(-1, 0);
+                    e.preventDefault();
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                    movePlayer(1, 0);
+                    e.preventDefault();
+                    break;
+            }
+        });
+
+        // Initialize
+        drawMaze();
+    </script>
+</body>
+</html>

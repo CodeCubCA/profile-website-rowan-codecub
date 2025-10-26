@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Art Studio - By Rowan</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tools {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .color-palette {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .color-btn {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .color-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .color-btn.active {
+            border-color: #333;
+            transform: scale(1.15);
+        }
+
+        .tool-btn {
+            padding: 0.6rem 1.2rem;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .tool-btn:hover {
+            background: #f8f9fa;
+            border-color: #f5576c;
+        }
+
+        .tool-btn.active {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        .canvas-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        #pixelCanvas {
+            border: 3px solid #333;
+            cursor: crosshair;
+            image-rendering: pixelated;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #f5576c;
+            border: 2px solid #f5576c;
+        }
+
+        .btn-secondary:hover {
+            background: #f5576c;
+            color: white;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: white;
+            color: #f5576c;
+            padding: 0.8rem 1.5rem;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .grid-size {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        input[type="range"] {
+            width: 150px;
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Portfolio
+    </a>
+
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-paint-brush"></i> Pixel Art Studio</h1>
+            <p>Create amazing pixel art!</p>
+        </div>
+
+        <div class="tools">
+            <div class="color-palette">
+                <button class="color-btn active" style="background: #000000" data-color="#000000"></button>
+                <button class="color-btn" style="background: #ffffff" data-color="#ffffff"></button>
+                <button class="color-btn" style="background: #ff0000" data-color="#ff0000"></button>
+                <button class="color-btn" style="background: #00ff00" data-color="#00ff00"></button>
+                <button class="color-btn" style="background: #0000ff" data-color="#0000ff"></button>
+                <button class="color-btn" style="background: #ffff00" data-color="#ffff00"></button>
+                <button class="color-btn" style="background: #ff00ff" data-color="#ff00ff"></button>
+                <button class="color-btn" style="background: #00ffff" data-color="#00ffff"></button>
+                <button class="color-btn" style="background: #ff6b6b" data-color="#ff6b6b"></button>
+                <button class="color-btn" style="background: #4ecdc4" data-color="#4ecdc4"></button>
+                <button class="color-btn" style="background: #45b7d1" data-color="#45b7d1"></button>
+                <button class="color-btn" style="background: #96ceb4" data-color="#96ceb4"></button>
+            </div>
+
+            <div class="grid-size">
+                <label>Grid Size:</label>
+                <input type="range" id="gridSize" min="8" max="32" value="16" step="4">
+                <span id="gridSizeLabel">16x16</span>
+            </div>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="pixelCanvas"></canvas>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-primary" onclick="downloadArt()">
+                <i class="fas fa-download"></i> Download
+            </button>
+            <button class="btn btn-secondary" onclick="clearCanvas()">
+                <i class="fas fa-trash"></i> Clear
+            </button>
+            <button class="btn btn-secondary" onclick="fillCanvas()">
+                <i class="fas fa-fill-drip"></i> Fill All
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('pixelCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let gridSize = 16;
+        let pixelSize = 20;
+        let currentColor = '#000000';
+        let isDrawing = false;
+        let pixels = {};
+
+        // Initialize canvas
+        function initCanvas() {
+            canvas.width = gridSize * pixelSize;
+            canvas.height = gridSize * pixelSize;
+            pixels = {};
+            drawGrid();
+        }
+
+        // Draw grid
+        function drawGrid() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw pixels
+            for (let key in pixels) {
+                const [x, y] = key.split(',').map(Number);
+                ctx.fillStyle = pixels[key];
+                ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+            }
+
+            // Draw grid lines
+            ctx.strokeStyle = '#ddd';
+            ctx.lineWidth = 1;
+
+            for (let i = 0; i <= gridSize; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i * pixelSize, 0);
+                ctx.lineTo(i * pixelSize, canvas.height);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(0, i * pixelSize);
+                ctx.lineTo(canvas.width, i * pixelSize);
+                ctx.stroke();
+            }
+        }
+
+        // Get pixel position
+        function getPixelPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = Math.floor((e.clientX - rect.left) / pixelSize);
+            const y = Math.floor((e.clientY - rect.top) / pixelSize);
+            return { x, y };
+        }
+
+        // Draw pixel
+        function drawPixel(x, y) {
+            if (x >= 0 && x < gridSize && y >= 0 && y < gridSize) {
+                pixels[`${x},${y}`] = currentColor;
+                drawGrid();
+            }
+        }
+
+        // Event listeners
+        canvas.addEventListener('mousedown', (e) => {
+            isDrawing = true;
+            const pos = getPixelPos(e);
+            drawPixel(pos.x, pos.y);
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (isDrawing) {
+                const pos = getPixelPos(e);
+                drawPixel(pos.x, pos.y);
+            }
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            isDrawing = false;
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            isDrawing = false;
+        });
+
+        // Touch support
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            isDrawing = true;
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const x = Math.floor((touch.clientX - rect.left) / pixelSize);
+            const y = Math.floor((touch.clientY - rect.top) / pixelSize);
+            drawPixel(x, y);
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (isDrawing) {
+                const touch = e.touches[0];
+                const rect = canvas.getBoundingClientRect();
+                const x = Math.floor((touch.clientX - rect.left) / pixelSize);
+                const y = Math.floor((touch.clientY - rect.top) / pixelSize);
+                drawPixel(x, y);
+            }
+        });
+
+        canvas.addEventListener('touchend', () => {
+            isDrawing = false;
+        });
+
+        // Color palette
+        document.querySelectorAll('.color-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentColor = btn.dataset.color;
+            });
+        });
+
+        // Grid size slider
+        document.getElementById('gridSize').addEventListener('input', (e) => {
+            gridSize = parseInt(e.target.value);
+            document.getElementById('gridSizeLabel').textContent = `${gridSize}x${gridSize}`;
+            initCanvas();
+        });
+
+        // Clear canvas
+        function clearCanvas() {
+            if (confirm('Are you sure you want to clear the canvas?')) {
+                pixels = {};
+                drawGrid();
+            }
+        }
+
+        // Fill canvas
+        function fillCanvas() {
+            for (let x = 0; x < gridSize; x++) {
+                for (let y = 0; y < gridSize; y++) {
+                    pixels[`${x},${y}`] = currentColor;
+                }
+            }
+            drawGrid();
+        }
+
+        // Download art
+        function downloadArt() {
+            const downloadCanvas = document.createElement('canvas');
+            const downloadCtx = downloadCanvas.getContext('2d');
+
+            downloadCanvas.width = gridSize * pixelSize;
+            downloadCanvas.height = gridSize * pixelSize;
+
+            // Draw pixels without grid
+            for (let key in pixels) {
+                const [x, y] = key.split(',').map(Number);
+                downloadCtx.fillStyle = pixels[key];
+                downloadCtx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+            }
+
+            // Download
+            const link = document.createElement('a');
+            link.download = 'pixel-art.png';
+            link.href = downloadCanvas.toDataURL();
+            link.click();
+        }
+
+        // Initialize
+        initCanvas();
+    </script>
+</body>
+</html>
