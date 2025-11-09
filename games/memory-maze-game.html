@@ -149,14 +149,14 @@
     </style>
 </head>
 <body>
-    <a href="index.html" class="back-btn">
+    <a href="../index.html" class="back-btn">
         <i class="fas fa-arrow-left"></i> Back to Portfolio
     </a>
 
     <div class="container">
         <div class="header">
             <h1><i class="fas fa-brain"></i> Memory Maze</h1>
-            <p>Remember the path and navigate the maze!</p>
+            <p>Remember the path, collect all keys, and reach the exit!</p>
         </div>
 
         <div class="stats">
@@ -169,7 +169,7 @@
                 <div class="stat-value" id="score">0</div>
             </div>
             <div class="stat">
-                <div class="stat-label">Items</div>
+                <div class="stat-label">Keys</div>
                 <div class="stat-value" id="items">0</div>
             </div>
         </div>
@@ -193,14 +193,14 @@
         const canvas = document.getElementById('mazeCanvas');
         const ctx = canvas.getContext('2d');
 
-        const gridSize = 10;
+        const gridSize = 15; // Increased from 10 to 15 for more complexity
         const cellSize = canvas.width / gridSize;
 
         let level = 1;
         let score = 0;
         let itemsCollected = 0;
         let player = { x: 0, y: 0 };
-        let exit = { x: 9, y: 9 };
+        let exit = { x: 14, y: 14 }; // Updated for 15x15 grid
         let items = [];
         let maze = [];
         let correctPath = [];
@@ -212,45 +212,116 @@
         function generateMaze() {
             maze = Array(gridSize).fill().map(() => Array(gridSize).fill(0));
 
-            // Simple path generation
+            // Generate a more challenging random path
             let x = 0, y = 0;
             correctPath = [{ x: 0, y: 0 }];
-
-            while (x < gridSize - 1 || y < gridSize - 1) {
-                maze[y][x] = 1;
-
-                const canGoRight = x < gridSize - 1;
-                const canGoDown = y < gridSize - 1;
-
-                if (canGoRight && canGoDown) {
-                    if (Math.random() > 0.5) {
-                        x++;
-                    } else {
-                        y++;
-                    }
-                } else if (canGoRight) {
-                    x++;
-                } else if (canGoDown) {
-                    y++;
-                }
-
-                correctPath.push({ x, y });
-            }
             maze[y][x] = 1;
 
-            // Add some extra paths
-            for (let i = 0; i < gridSize * 2; i++) {
+            // Create a much more winding and challenging path
+            const targetPathLength = 25 + level * 3; // Significantly longer paths
+            let attempts = 0;
+            const maxAttempts = 200;
+
+            while ((x !== gridSize - 1 || y !== gridSize - 1) && attempts < maxAttempts) {
+                const directions = [];
+
+                // Check all four directions
+                if (x > 0 && !correctPath.some(p => p.x === x - 1 && p.y === y)) directions.push({ dx: -1, dy: 0 }); // Left
+                if (x < gridSize - 1 && !correctPath.some(p => p.x === x + 1 && p.y === y)) directions.push({ dx: 1, dy: 0 }); // Right
+                if (y > 0 && !correctPath.some(p => p.x === x && p.y === y - 1)) directions.push({ dx: 0, dy: -1 }); // Up
+                if (y < gridSize - 1 && !correctPath.some(p => p.x === x && p.y === y + 1)) directions.push({ dx: 0, dy: 1 }); // Down
+
+                // If we're stuck, break and retry
+                if (directions.length === 0) {
+                    break;
+                }
+
+                let direction;
+                // Much more random walk with less bias - makes path harder to predict
+                if (correctPath.length < targetPathLength && Math.random() > 0.15) {
+                    direction = directions[Math.floor(Math.random() * directions.length)];
+                } else {
+                    // Bias towards exit when we've reached target length
+                    const towardsExit = directions.filter(d => {
+                        const newX = x + d.dx;
+                        const newY = y + d.dy;
+                        const currentDist = Math.abs(gridSize - 1 - x) + Math.abs(gridSize - 1 - y);
+                        const newDist = Math.abs(gridSize - 1 - newX) + Math.abs(gridSize - 1 - newY);
+                        return newDist < currentDist;
+                    });
+                    direction = towardsExit.length > 0 ?
+                        towardsExit[Math.floor(Math.random() * towardsExit.length)] :
+                        directions[Math.floor(Math.random() * directions.length)];
+                }
+
+                x += direction.dx;
+                y += direction.dy;
+                maze[y][x] = 1;
+                correctPath.push({ x, y });
+                attempts++;
+            }
+
+            // If we didn't reach the exit, ensure we do with a direct path
+            if (x !== gridSize - 1 || y !== gridSize - 1) {
+                while (x < gridSize - 1) {
+                    x++;
+                    maze[y][x] = 1;
+                    if (!correctPath.some(p => p.x === x && p.y === y)) {
+                        correctPath.push({ x, y });
+                    }
+                }
+                while (y < gridSize - 1) {
+                    y++;
+                    maze[y][x] = 1;
+                    if (!correctPath.some(p => p.x === x && p.y === y)) {
+                        correctPath.push({ x, y });
+                    }
+                }
+            }
+
+            // Add many more challenging decoy paths and dead ends
+            const numDecoys = Math.min(gridSize * 3 + level * 5, 60);
+            for (let i = 0; i < numDecoys; i++) {
                 const rx = Math.floor(Math.random() * gridSize);
                 const ry = Math.floor(Math.random() * gridSize);
                 maze[ry][rx] = 1;
             }
 
+            // Create branching dead-end paths to confuse players
+            const numDeadEnds = 5 + level * 2;
+            for (let i = 0; i < numDeadEnds; i++) {
+                // Pick a random point on the correct path
+                const startIdx = Math.floor(Math.random() * correctPath.length);
+                let branchX = correctPath[startIdx].x;
+                let branchY = correctPath[startIdx].y;
+
+                // Create a dead end branch (2-4 cells long)
+                const branchLength = 2 + Math.floor(Math.random() * 3);
+                for (let j = 0; j < branchLength; j++) {
+                    const directions = [];
+                    if (branchX > 0 && maze[branchY][branchX - 1] === 0) directions.push({ dx: -1, dy: 0 });
+                    if (branchX < gridSize - 1 && maze[branchY][branchX + 1] === 0) directions.push({ dx: 1, dy: 0 });
+                    if (branchY > 0 && maze[branchY - 1][branchX] === 0) directions.push({ dx: 0, dy: -1 });
+                    if (branchY < gridSize - 1 && maze[branchY + 1][branchX] === 0) directions.push({ dx: 0, dy: 1 });
+
+                    if (directions.length === 0) break;
+
+                    const dir = directions[Math.floor(Math.random() * directions.length)];
+                    branchX += dir.dx;
+                    branchY += dir.dy;
+                    maze[branchY][branchX] = 1;
+                }
+            }
+
             // Generate items along the path
             items = [];
-            const numItems = Math.min(3 + level, correctPath.length - 2);
+            const numItems = Math.min(3 + Math.floor(level / 2), correctPath.length - 2);
+            const itemSpacing = Math.floor(correctPath.length / (numItems + 1));
             for (let i = 0; i < numItems; i++) {
-                const index = Math.floor(Math.random() * (correctPath.length - 2)) + 1;
-                items.push({ ...correctPath[index], collected: false });
+                const index = Math.min((i + 1) * itemSpacing, correctPath.length - 2);
+                if (index > 0 && index < correctPath.length - 1) {
+                    items.push({ ...correctPath[index], collected: false });
+                }
             }
         }
 
@@ -261,10 +332,16 @@
             // Draw cells
             for (let y = 0; y < gridSize; y++) {
                 for (let x = 0; x < gridSize; x++) {
-                    if (maze[y][x] === 1) {
-                        ctx.fillStyle = '#f0f0f0';
-                    } else {
+                    // During play phase, hide the maze - show all cells as walls
+                    if (gamePhase === 'play') {
                         ctx.fillStyle = '#333';
+                    } else {
+                        // During memorize phase, show the actual maze
+                        if (maze[y][x] === 1) {
+                            ctx.fillStyle = '#f0f0f0';
+                        } else {
+                            ctx.fillStyle = '#333';
+                        }
                     }
                     ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
 
@@ -333,15 +410,21 @@
             document.getElementById('phase').textContent = 'Memorize the path!';
             document.getElementById('message').textContent = '';
             generateMaze();
+
+            // Update keys counter to show total
+            const totalKeys = items.length;
+            document.getElementById('items').textContent = `0/${totalKeys}`;
+
             drawMaze();
 
-            // Show path for a few seconds
+            // Show path for a few seconds - decreases as level increases for harder difficulty
+            const memorizeTime = Math.max(2000, 4000 - level * 200);
             setTimeout(() => {
                 showingPath = false;
                 gamePhase = 'play';
-                document.getElementById('phase').textContent = 'Navigate the maze!';
+                document.getElementById('phase').textContent = 'Navigate and collect all keys!';
                 drawMaze();
-            }, 3000 + level * 500);
+            }, memorizeTime);
         }
 
         // Move player
@@ -362,14 +445,23 @@
                         item.collected = true;
                         itemsCollected++;
                         score += 10;
-                        document.getElementById('items').textContent = itemsCollected;
+                        const totalKeys = items.length;
+                        document.getElementById('items').textContent = `${itemsCollected}/${totalKeys}`;
                         document.getElementById('score').textContent = score;
                     }
                 });
 
-                // Check for exit
+                // Check for exit (only allow if all items collected)
                 if (player.x === exit.x && player.y === exit.y) {
-                    levelComplete();
+                    const allItemsCollected = items.every(item => item.collected);
+                    if (allItemsCollected) {
+                        levelComplete();
+                    } else {
+                        document.getElementById('message').textContent = '⚠️ Collect all keys first!';
+                        setTimeout(() => {
+                            document.getElementById('message').textContent = '';
+                        }, 2000);
+                    }
                 }
 
                 drawMaze();
@@ -398,7 +490,6 @@
             gamePhase = 'memorize';
             document.getElementById('level').textContent = level;
             document.getElementById('score').textContent = score;
-            document.getElementById('items').textContent = itemsCollected;
             document.getElementById('message').textContent = '';
             startGame();
         }

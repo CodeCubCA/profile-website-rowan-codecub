@@ -350,28 +350,28 @@ function openGame(gameId) {
     switch(gameId) {
         case 'oneLeft':
             // Navigate to existing One Left game
-            window.location.href = 'one-left-game.html?from=portfolio';
+            window.location.href = 'games/one-left-game.html?from=portfolio';
             break;
 
         case 'snakeOdyssey':
             // Navigate to Snake Odyssey game
-            window.location.href = 'snake-odyssey-game.html?from=portfolio';
+            window.location.href = 'games/snake-odyssey-game.html?from=portfolio';
             break;
 
         case 'puzzleQuest':
-            window.location.href = 'puzzle-quest-game.html?from=portfolio';
+            window.location.href = 'games/puzzle-quest-game.html?from=portfolio';
             break;
 
         case 'mathRunner':
-            window.location.href = 'math-runner-game.html?from=portfolio';
+            window.location.href = 'games/math-runner-game.html?from=portfolio';
             break;
 
         case 'pixelArt':
-            window.location.href = 'pixel-art-game.html?from=portfolio';
+            window.location.href = 'games/pixel-art-game.html?from=portfolio';
             break;
 
         case 'memoryMaze':
-            window.location.href = 'memory-maze-game.html?from=portfolio';
+            window.location.href = 'games/memory-maze-game.html?from=portfolio';
             break;
 
         default:
