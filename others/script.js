@@ -1,5 +1,8 @@
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
+    // Create animated stars background
+    createStars();
+
     // Mobile menu toggle
     const hamburger = document.querySelector('.hamburger');
     const navMenu = document.querySelector('.nav-menu');
@@ -459,5 +462,56 @@ function closeGameNotification() {
                 notification.remove();
             }
         }, 300);
+    }
+}
+
+// Create animated stars background
+function createStars() {
+    // Create stars container
+    const starsContainer = document.createElement('div');
+    starsContainer.className = 'stars-container';
+    document.body.insertBefore(starsContainer, document.body.firstChild);
+
+    // Create regular twinkling stars
+    const starCount = 100;
+    const sizes = ['small', 'medium', 'large'];
+
+    for (let i = 0; i < starCount; i++) {
+        const star = document.createElement('div');
+        star.className = `star ${sizes[Math.floor(Math.random() * sizes.length)]}`;
+
+        // Random position
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+
+        // Random animation delay for more natural twinkling
+        star.style.animationDelay = Math.random() * 3 + 's';
+        star.style.animationDuration = (2 + Math.random() * 2) + 's';
+
+        starsContainer.appendChild(star);
+    }
+
+    // Create glowing stars
+    const glowStarCount = 15;
+    for (let i = 0; i < glowStarCount; i++) {
+        const glowStar = document.createElement('div');
+        glowStar.className = 'glow-star';
+
+        // Random position
+        glowStar.style.left = Math.random() * 100 + '%';
+        glowStar.style.top = Math.random() * 100 + '%';
+
+        // Random animation delays
+        glowStar.style.animationDelay = Math.random() * 2 + 's';
+
+        starsContainer.appendChild(glowStar);
+    }
+
+    // Create shooting stars
+    const shootingStarCount = 5;
+    for (let i = 0; i < shootingStarCount; i++) {
+        const shootingStar = document.createElement('div');
+        shootingStar.className = 'shooting-star';
+        starsContainer.appendChild(shootingStar);
     }
 }

@@ -1376,3 +1376,529 @@ section {
         padding: 1.5rem;
     }
 }
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+/* Fade in from bottom animation */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Slide in from left */
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Slide in from right */
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Scale up animation */
+@keyframes scaleUp {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Bounce animation */
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-20px);
+    }
+    60% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Pulse animation */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Float animation */
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Gradient shift animation */
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Applying animations to elements */
+
+/* Hero section animations */
+.hero {
+    animation: fadeIn 1s ease-in-out;
+}
+
+.hero-text h1 {
+    animation: slideInLeft 0.8s ease-out;
+}
+
+.hero-text .hero-subtitle {
+    animation: slideInLeft 1s ease-out 0.2s both;
+}
+
+.hero-text .hero-description {
+    animation: slideInLeft 1.2s ease-out 0.4s both;
+}
+
+.hero-buttons {
+    animation: fadeInUp 1s ease-out 0.6s both;
+}
+
+.hero-image .profile-card {
+    animation: slideInRight 1s ease-out 0.4s both;
+}
+
+/* Section animations */
+section {
+    animation: fadeInUp 0.8s ease-out;
+}
+
+.section-header {
+    animation: fadeInUp 0.8s ease-out;
+}
+
+/* Project cards staggered animation */
+.project-card {
+    animation: fadeInUp 0.8s ease-out;
+    animation-fill-mode: both;
+}
+
+.project-card:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.project-card:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.project-card:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+/* Game cards staggered animation */
+.game-card {
+    animation: scaleUp 0.6s ease-out;
+    animation-fill-mode: both;
+}
+
+.game-card:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.game-card:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.game-card:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.game-card:nth-child(4) {
+    animation-delay: 0.4s;
+}
+
+.game-card:nth-child(5) {
+    animation-delay: 0.5s;
+}
+
+.game-card:nth-child(6) {
+    animation-delay: 0.6s;
+}
+
+.game-card:nth-child(7) {
+    animation-delay: 0.7s;
+}
+
+.game-card:nth-child(8) {
+    animation-delay: 0.8s;
+}
+
+/* Skill cards animation */
+.skill-card {
+    animation: fadeInUp 0.6s ease-out;
+    animation-fill-mode: both;
+}
+
+.skill-card:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.skill-card:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.skill-card:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.skill-card:nth-child(4) {
+    animation-delay: 0.4s;
+}
+
+/* Hover animations */
+.project-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.project-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+}
+
+.game-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.game-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+}
+
+.skill-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.skill-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* Button hover animations */
+.btn {
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+}
+
+/* Navigation logo animation */
+.nav-logo i {
+    animation: pulse 2s infinite;
+}
+
+/* Profile image float animation */
+.profile-img {
+    animation: float 3s ease-in-out infinite;
+}
+
+/* Stats counter animation */
+.stat {
+    animation: fadeInUp 0.8s ease-out;
+}
+
+.stat:nth-child(1) {
+    animation-delay: 0.2s;
+}
+
+.stat:nth-child(2) {
+    animation-delay: 0.4s;
+}
+
+.stat:nth-child(3) {
+    animation-delay: 0.6s;
+}
+
+/* Animated gradient background for body */
+body {
+    background: linear-gradient(to bottom, #ff8c00, #ff9500, #ffa500, #667eea, #4169e1, #1e90ff);
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+}
+
+/* Loading animation for images */
+.project-image, .game-image img {
+    transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+.project-image:hover, .game-image img:hover {
+    transform: scale(1.05);
+}
+
+/* Smooth scroll behavior */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Tech badge animation */
+.tech-badge {
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.tech-badge:hover {
+    transform: translateY(-3px);
+    filter: brightness(1.1);
+}
+
+/* Footer animation */
+.footer {
+    animation: fadeIn 1s ease-out;
+}
+
+.social-links a {
+    transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.social-links a:hover {
+    transform: translateY(-5px) scale(1.2);
+}
+
+/* Education item animation */
+.education-item {
+    animation: slideInLeft 0.8s ease-out;
+}
+
+/* About stats animation */
+.about-stats {
+    animation: fadeInUp 1s ease-out 0.5s both;
+}
+
+/* ============================================
+   STAR ANIMATIONS
+   ============================================ */
+
+/* Shooting star animation */
+@keyframes shootingStar {
+    0% {
+        transform: translateX(0) translateY(0) rotate(-45deg);
+        opacity: 1;
+    }
+    70% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(-500px) translateY(300px) rotate(-45deg);
+        opacity: 0;
+    }
+}
+
+/* Twinkle animation */
+@keyframes twinkle {
+    0%, 100% {
+        opacity: 0.3;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+}
+
+/* Glow pulse animation */
+@keyframes glowPulse {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.8),
+                    0 0 30px rgba(102, 126, 234, 0.6);
+    }
+}
+
+/* Star container */
+.stars-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+/* Individual star styles */
+.star {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    animation: twinkle 3s infinite;
+}
+
+/* Different star sizes */
+.star.small {
+    width: 2px;
+    height: 2px;
+}
+
+.star.medium {
+    width: 3px;
+    height: 3px;
+}
+
+.star.large {
+    width: 4px;
+    height: 4px;
+}
+
+/* Shooting star */
+.shooting-star {
+    position: absolute;
+    background: linear-gradient(90deg, white, transparent);
+    height: 2px;
+    width: 100px;
+    animation: shootingStar 3s linear infinite;
+    opacity: 0;
+}
+
+.shooting-star::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 5px;
+    height: 5px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 0 10px white;
+}
+
+/* Staggered shooting stars */
+.shooting-star:nth-child(1) {
+    top: 10%;
+    right: 10%;
+    animation-delay: 2s;
+}
+
+.shooting-star:nth-child(2) {
+    top: 30%;
+    right: 30%;
+    animation-delay: 5s;
+}
+
+.shooting-star:nth-child(3) {
+    top: 50%;
+    right: 50%;
+    animation-delay: 8s;
+}
+
+.shooting-star:nth-child(4) {
+    top: 20%;
+    right: 70%;
+    animation-delay: 11s;
+}
+
+.shooting-star:nth-child(5) {
+    top: 60%;
+    right: 20%;
+    animation-delay: 14s;
+}
+
+/* Glowing stars - larger, brighter stars */
+.glow-star {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    width: 6px;
+    height: 6px;
+    animation: glowPulse 2s infinite, twinkle 4s infinite;
+}
+
+/* Container needs to be behind content */
+.container {
+    position: relative;
+    z-index: 1;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    .stars-container {
+        display: none;
+    }
+}
