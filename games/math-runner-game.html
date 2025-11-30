@@ -102,35 +102,9 @@
 
         .motion-fill {
             height: 100%;
-            background: linear-gradient(135deg, #4ecdc4 0%, #44a3a0 100%);
-            transition: width 0.2s;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            transition: width 0.3s, background 0.3s;
             border-radius: 15px;
-        }
-
-        .permission-prompt {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 2rem;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-            z-index: 2000;
-            display: none;
-        }
-
-        .permission-prompt button {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-            color: white;
-            border: none;
-            padding: 1rem 2rem;
-            border-radius: 30px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 1rem;
         }
     </style>
 </head>
@@ -141,19 +115,15 @@
 
     <canvas id="gameCanvas"></canvas>
 
-    <div class="permission-prompt" id="permissionPrompt">
-        <h2><i class="fas fa-running"></i> Motion Required!</h2>
-        <p>This game uses your device's motion sensors.</p>
-        <p><strong>Run in place or shake your device to move faster!</strong></p>
-        <button onclick="requestMotionPermission()">Enable Motion</button>
-    </div>
-
     <div class="motion-indicator">
-        <div><strong><i class="fas fa-running"></i> Movement Speed</strong></div>
+        <div><strong><i class="fas fa-tachometer-alt"></i> Speed Control</strong></div>
         <div class="motion-bar">
-            <div class="motion-fill" id="motionFill" style="width: 0%"></div>
+            <div class="motion-fill" id="motionFill" style="width: 50%"></div>
         </div>
-        <div style="margin-top: 0.5rem; font-size: 0.9rem;" id="motionStatus">Not moving</div>
+        <div style="margin-top: 0.5rem; font-size: 0.9rem;" id="motionStatus">Normal Speed</div>
+        <div style="margin-top: 0.5rem; font-size: 0.8rem; color: #666;">
+            Press <strong>W</strong> to sprint | <strong>S</strong> to slow down
+        </div>
     </div>
 
     <div class="game-over" id="gameOver">
@@ -187,102 +157,59 @@
         let correctAnswers = 0;
         let baseGameSpeed = 3;
         let gameSpeed = 3;
+        let baseGravity = 0.6;
         let gravity = 0.6;
         let jumpPower = -15;
         let gameRunning = true;
         let currentQuestion = null;
         let frameCount = 0;
 
-        // Motion detection variables
-        let motionIntensity = 0;
-        let lastAcceleration = { x: 0, y: 0, z: 0 };
-        let motionHistory = [];
-        let motionPermissionGranted = false;
-        const MOTION_SMOOTHING = 10;
-        const MIN_SPEED = 1;
-        const MAX_SPEED = 8;
+        // Speed control variables
+        let speedBoost = 0; // -1 for slow, 0 for normal, 1 for fast
+        let currentSpeedMultiplier = 1.0;
+        const SLOW_MULTIPLIER = 0.7;  // Not too slow - still playable
+        const FAST_MULTIPLIER = 1.5;  // Not too fast - still controllable
+        const NORMAL_MULTIPLIER = 1.0;
+        const SLOW_GRAVITY_MULTIPLIER = 0.7;  // Reduced gravity in slow mode
+        const FAST_GRAVITY_MULTIPLIER = 1.2;  // Increased gravity in fast mode
 
-        // Request motion permission
-        function requestMotionPermission() {
-            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-                // iOS 13+ requires permission
-                DeviceMotionEvent.requestPermission()
-                    .then(permissionState => {
-                        if (permissionState === 'granted') {
-                            startMotionDetection();
-                        }
-                    })
-                    .catch(console.error);
-            } else {
-                // Non-iOS or older devices
-                startMotionDetection();
-            }
-            document.getElementById('permissionPrompt').style.display = 'none';
-        }
-
-        // Start motion detection
-        function startMotionDetection() {
-            motionPermissionGranted = true;
-
-            window.addEventListener('devicemotion', (event) => {
-                if (!event.acceleration) return;
-
-                const acc = event.acceleration;
-
-                // Calculate acceleration magnitude (movement intensity)
-                const deltaX = Math.abs(acc.x - lastAcceleration.x);
-                const deltaY = Math.abs(acc.y - lastAcceleration.y);
-                const deltaZ = Math.abs(acc.z - lastAcceleration.z);
-
-                const movement = Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
-
-                // Add to history for smoothing
-                motionHistory.push(movement || 0);
-                if (motionHistory.length > MOTION_SMOOTHING) {
-                    motionHistory.shift();
-                }
-
-                // Calculate average motion
-                const avgMotion = motionHistory.reduce((a, b) => a + b, 0) / motionHistory.length;
-                motionIntensity = Math.min(avgMotion * 2, 100); // Scale and cap at 100
-
-                lastAcceleration = { x: acc.x || 0, y: acc.y || 0, z: acc.z || 0 };
-
-                // Update game speed based on motion
-                updateGameSpeed();
-                updateMotionIndicator();
-            });
-        }
-
-        // Update game speed based on motion
+        // Update game speed and gravity based on keyboard input
         function updateGameSpeed() {
-            // Map motion intensity (0-100) to game speed (MIN_SPEED to MAX_SPEED)
-            const speedMultiplier = MIN_SPEED + (motionIntensity / 100) * (MAX_SPEED - MIN_SPEED);
-            gameSpeed = baseGameSpeed * speedMultiplier;
+            // Apply speed multiplier based on current input
+            if (speedBoost === 1) {
+                currentSpeedMultiplier = FAST_MULTIPLIER;
+                gravity = baseGravity * FAST_GRAVITY_MULTIPLIER;  // Faster falling
+            } else if (speedBoost === -1) {
+                currentSpeedMultiplier = SLOW_MULTIPLIER;
+                gravity = baseGravity * SLOW_GRAVITY_MULTIPLIER;  // Slower, floatier jumps
+            } else {
+                currentSpeedMultiplier = NORMAL_MULTIPLIER;
+                gravity = baseGravity;  // Normal gravity
+            }
 
-            // Decay motion intensity gradually if no new movement
-            motionIntensity *= 0.95;
+            gameSpeed = baseGameSpeed * currentSpeedMultiplier;
         }
 
-        // Update motion indicator UI
-        function updateMotionIndicator() {
+        // Update speed indicator UI
+        function updateSpeedIndicator() {
             const fillElement = document.getElementById('motionFill');
             const statusElement = document.getElementById('motionStatus');
 
-            fillElement.style.width = motionIntensity + '%';
-
-            if (motionIntensity < 10) {
-                statusElement.textContent = 'Not moving - RUN!';
-                statusElement.style.color = '#ff6b6b';
-            } else if (motionIntensity < 40) {
-                statusElement.textContent = 'Walking - Run faster!';
-                statusElement.style.color = '#f39c12';
-            } else if (motionIntensity < 70) {
-                statusElement.textContent = 'Jogging - Good!';
-                statusElement.style.color = '#3498db';
-            } else {
-                statusElement.textContent = 'Sprinting!';
+            if (speedBoost === 1) {
+                fillElement.style.width = '100%';
+                fillElement.style.background = 'linear-gradient(135deg, #4ecdc4 0%, #44a3a0 100%)';
+                statusElement.textContent = 'Sprinting! (W)';
                 statusElement.style.color = '#4ecdc4';
+            } else if (speedBoost === -1) {
+                fillElement.style.width = '25%';
+                fillElement.style.background = 'linear-gradient(135deg, #f39c12 0%, #e67e22 100%)';
+                statusElement.textContent = 'Slow (S)';
+                statusElement.style.color = '#f39c12';
+            } else {
+                fillElement.style.width = '50%';
+                fillElement.style.background = 'linear-gradient(135deg, #3498db 0%, #2980b9 100%)';
+                statusElement.textContent = 'Normal Speed';
+                statusElement.style.color = '#3498db';
             }
         }
 
@@ -403,6 +330,10 @@
 
             frameCount++;
 
+            // Update game speed based on keyboard input
+            updateGameSpeed();
+            updateSpeedIndicator();
+
             // Update player
             player.velocityY += gravity;
             player.y += player.velocityY;
@@ -492,35 +423,48 @@
             correctAnswers = 0;
             baseGameSpeed = 3;
             gameSpeed = 3;
+            gravity = baseGravity;
             gameRunning = true;
             currentQuestion = null;
             frameCount = 0;
-            motionIntensity = 0;
-            motionHistory = [];
+            speedBoost = 0;
+            currentSpeedMultiplier = 1.0;
             document.getElementById('gameOver').style.display = 'none';
+            updateSpeedIndicator();
             gameLoop();
         }
 
-        // Initialize motion detection on load
+        // Initialize game
         function initGame() {
             // Set initial player position on ground
             player.y = canvas.height - GROUND_HEIGHT - player.height;
 
-            // Check if motion sensors are available
-            if (window.DeviceMotionEvent) {
-                document.getElementById('permissionPrompt').style.display = 'block';
-            } else {
-                // No motion sensors - run at default speed
-                console.log('No motion sensors available - using default speed');
-                gameSpeed = baseGameSpeed;
-            }
+            // Initialize game speed
+            updateGameSpeed();
+            updateSpeedIndicator();
         }
 
         // Controls
         document.addEventListener('keydown', (e) => {
-            if (e.code === 'Space' && !player.jumping && gameRunning) {
+            if (!gameRunning) return;
+
+            if (e.code === 'Space' && !player.jumping) {
                 player.velocityY = jumpPower;
                 player.jumping = true;
+            }
+
+            // Speed controls
+            if (e.code === 'KeyW') {
+                speedBoost = 1; // Fast
+            } else if (e.code === 'KeyS') {
+                speedBoost = -1; // Slow
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            // Reset speed to normal when W or S is released
+            if (e.code === 'KeyW' || e.code === 'KeyS') {
+                speedBoost = 0;
             }
         });
 
