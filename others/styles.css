@@ -586,6 +586,60 @@ section {
     font-size: 1rem;
 }
 
+/* AI Image Generator Project */
+.ai-image-generator-project {
+    border-top: 5px solid #d946ef;
+    position: relative;
+    grid-column: 1 / -1; /* Full width featured project */
+}
+
+.ai-image-generator-project .project-image-container {
+    background: linear-gradient(135deg, #a855f7 0%, #d946ef 25%, #ec4899 50%, #f472b6 75%, #fbbf24 100%);
+    background-size: 200% 200%;
+    animation: artGradient 8s ease-in-out infinite;
+}
+
+@keyframes artGradient {
+    0%, 100% { background-position: 0% 50%; }
+    33% { background-position: 100% 50%; }
+    66% { background-position: 0% 100%; }
+}
+
+.ai-image-generator-project:hover {
+    box-shadow: 0 25px 60px rgba(217, 70, 239, 0.5);
+}
+
+/* AI Image Generator specific tech badges */
+.tech-badge.huggingface {
+    background: linear-gradient(135deg, #ff9d00, #ffb340);
+    color: white;
+}
+
+.tech-badge.stable-diffusion {
+    background: linear-gradient(135deg, #d946ef, #f472b6);
+    color: white;
+}
+
+/* AI Image Live Button */
+.ai-image-live-btn {
+    background: linear-gradient(135deg, #a855f7 0%, #ec4899 50%, #fbbf24 100%);
+    color: white;
+    border: 2px solid transparent;
+    background-size: 200% 200%;
+    animation: buttonGradient 3s ease-in-out infinite;
+}
+
+@keyframes buttonGradient {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+.ai-image-live-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(236, 72, 153, 0.6);
+    animation: buttonGradient 1.5s ease-in-out infinite;
+}
+
 /* Voice-specific tech badges */
 .tech-badge.ai {
     background: linear-gradient(135deg, #8b5cf6, #a855f7);
